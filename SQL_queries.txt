@@ -1,0 +1,100 @@
+P-2
+
+GROUP FUNCTIONS:
+
+select AVG(number_grade)from student_grades;
+
+select SUM(number_grade)from student_grades;
+
+select MAX(number_grade)from student_grades;
+
+select MIN(number_grade)from student_grades;
+
+select COUNT(number_grade)from student_grades;
+
+select * FROM   INFORMATION_SCHEMA.Columns where table_name = 'tablename';
+
+check for sysdate equivalent.
+
+
+SCALAR FUNCTIONS:
+
+1. Character functions
+2. Number/Numeric Functions
+3. Date Functions
+4. Conversion Functions
+
+1. Character Functions (check for this expection error Msg 8116, Level 16, State 1, Line 26
+Argument data type text is invalid for argument 1 of Trim function. To use these functions check expections eror.)
+
+a. upper() >>>> It converts into upper case letters.
+b. Lower() >>>> It converts into lower case letters.
+c. Initcap() >> It converts First letter into capital and remaining in lower case letters.
+d. len() >>> which gives us the length of a string
+e. LPAD()
+f. RPAD()
+G. TRIM() It removes the specified characters from both sides.
+
+select trim('   google    ') from dual;
+
+h. INSTR() It returns the position of the character within a string.
+select instr('ORACLE','E') from tablename
+
+i. SUBSTRING()  will Return the substring of the string.
+
+select SUBSTRING(student_name,2,5) from student_grades;
+
+j. CONCAT() Itwill join two strings.
+
+select CONCAT(Customer_name,' ', Address) as cusotmerAddress from Customer;
+
+
+
+2. NUMERIC FUNCTIONS:
+
+abs()  returns absolute value.
+
+sqrt() returns square root of provided value.
+
+mod() return the remainder value
+
+power() return power value ()
+
+Trunc() removes the decimal points.
+
+
+3. DATE FUNCTIONS
+
+GETDATE()	Returns the current date and time
+DATEPART()	Returns a single part of a date/time
+DATEADD()	Adds or subtracts a specified time interval from a date
+DATEDIFF()	Returns the time between two dates
+CONVERT()	Displays date/time data in different formats
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

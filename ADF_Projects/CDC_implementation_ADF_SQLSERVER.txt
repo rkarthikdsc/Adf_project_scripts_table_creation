@@ -1,0 +1,95 @@
+Steps to implement CDC in ADF pipeline:
+
+1. First create a database and the tables in the source and the sink in SQL.
+
+create database Products ;
+
+	CREATE TABLE dbo.tbl_products_source (
+	  product_id INT PRIMARY KEY,
+	  product_name VARCHAR(50),
+	  category VARCHAR(20),
+	  price DECIMAL(10,2)
+	);
+
+
+	CREATE TABLE dbo.tbl_products_sink (
+	  product_id INT PRIMARY KEY,
+	  product_name VARCHAR(50),
+	  category VARCHAR(20),
+	  price DECIMAL(10,2)
+	);
+
+2.create a ADf dataflow.
+
+*  choose the source dataset in the source settings
+*  In source options >>> select the Change Data Capture option.
+*  Then select the Type (Incremental column or SQL server CDC).
+*  Select the Run mode (Full on the first run,then incremental or Incremental changes only).
+
+*  Then when we try to preview the source data, we will get the below:
+
+	Error:
+Spark job failed: {
+"text/plain": "{\"runId\":\"98327110-6125-42e6-b5b9-5f625773e29c\",\"sessionId\":\"3d9c9d5e-0136-43aa-b259-57aae1979295\",\"status\":\"Failed\",\"payload\":{\"statusCode\":400,\"shortMessage\":\"DF-SQLCDC_010 at Source 'source1'(Line 1/Col 0): Failed while quering CDC metadata for table dbo.tbl_products_source\",\"detailedMessage\":\"Failure 2023-06-16 06:49:54.208 failed DebugManager.processJob, run=98327110-6125-42e6-b5b9-5f625773e29c, errorMessage=DF-SQLCDC_010 at Source 'source1'(Line 1/Col 0): Failed while quering CDC metadata for table dbo.tbl_products_source\"}}\n"
+} - RunId: 98327110-6125-42e6-b5b9-5f625773e29c
+
+
+* We get this error because CDC can be implemented only on the Standard 3 service tier type and above.(It wont work in S0,s1,s2).
+
+So, In order to change this error we have to change the SQL database service tier.
+
+Go to database >> Products >> Compute + Storage >> Service and compute tier >> service tier >> change the DTUs(100) which will show S3.
+
+
+So basically, in order to implement CDC we need performance level minimum S3.(With free trial we cant try).
+
+
+Follow below commands to enable and disable CDC to the database.
+
+
+select name , is_cdc_enabled from sys.databases	  
+	exec sys.sp_cdc_enable_db
+
+
+
+	select name, is_tracked_by_cdc from sys.tables
+  
+	EXEC sys.sp_cdc_enable_table  
+	@source_schema  = N'dbo',  
+	@source_name    = N'tbl_products_source',  
+	@role_name      = NULL,   
+	@supports_net_changes = 1
+	GO
+
+
+
+	sys.sp_cdc_help_change_data_capture
+
+
+
+
+
+
+--- EXEC sys.sp_cdc_disable_db  
+
+EXEC sys.sp_cdc_disable_table  
+@source_schema = N'dbo',  
+@source_name   =  N'tbl_products_source',  
+@capture_instance = 'dbo_tbl_products_source'
+GO 
+
+
+AFter executing the above steps we can see certain tables under the sys.database with CDC schema name. we can go and check the changes that happend in both the database and the table level.
+
+
+Afterimplementation just disable the CDC and change the azure SQL server configurations.
+
+
+
+
+
+
+
+
+
+

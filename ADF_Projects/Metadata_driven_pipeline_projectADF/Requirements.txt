@@ -1,0 +1,12 @@
+ * 
+
+
+* Need to copy multiple tables from multiple schema.
+
+* Need Flexiblity to choose/chane our source path and destination path.
+
+* In futureyou should be able to copy more tables from ur source systems with less development efforts
+
+* We should be able to select relevant columns, rename our columns and even apply filters on source data.
+
+This type of design is called Metadata driven framework.

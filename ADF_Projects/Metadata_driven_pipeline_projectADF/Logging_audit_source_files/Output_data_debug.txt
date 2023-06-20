@@ -1,0 +1,127 @@
+{
+	"dataRead": 60192,
+	"dataWritten": 62727,
+	"filesWritten": 1,
+	"sourcePeakConnections": 1,
+	"sinkPeakConnections": 1,
+	"rowsRead": 450,
+	"rowsCopied": 450,
+	"copyDuration": 9,
+	"throughput": 30.096,
+	"errors": [],
+	"effectiveIntegrationRuntime": "AutoResolveIntegrationRuntime (UK South)",
+	"usedDataIntegrationUnits": 4,
+	"billingReference": {
+		"activityType": "DataMovement",
+		"billableDuration": [
+			{
+				"meterType": "AzureIR",
+				"duration": 0.06666666666666667,
+				"unit": "DIUHours"
+			}
+		]
+	},
+	"usedParallelCopies": 1,
+	"executionDetails": [
+		{
+			"source": {
+				"type": "AzureSqlDatabase",
+				"region": "East US"
+			},
+			"sink": {
+				"type": "AzureBlobFS",
+				"region": "UK South"
+			},
+			"status": "Succeeded",
+			"start": "6/20/2023, 2:16:27 PM",
+			"duration": 9,
+			"usedDataIntegrationUnits": 4,
+			"usedParallelCopies": 1,
+			"profile": {
+				"queue": {
+					"status": "Completed",
+					"duration": 5
+				},
+				"transfer": {
+					"status": "Completed",
+					"duration": 2,
+					"details": {
+						"readingFromSource": {
+							"type": "AzureSqlDatabase",
+							"workingDuration": 0,
+							"timeToFirstByte": 0
+						},
+						"writingToSink": {
+							"type": "AzureBlobFS",
+							"workingDuration": 0
+						}
+					}
+				}
+			},
+			"detailedDurations": {
+				"queuingDuration": 5,
+				"timeToFirstByte": 0,
+				"transferDuration": 2
+			}
+		}
+	],
+	"dataConsistencyVerification": {
+		"VerificationResult": "NotVerified"
+	},
+	"durationInQueue": {
+		"integrationRuntimeQueue": 0
+	}
+}
+
+
+
+-------------------------------------------------------------
+
+Source/Sink
+
+{
+	"count": 3,
+	"value": [
+		{
+			"sourceId": 1,
+			"sourceSchema": "SalesLT",
+			"sourceTable": "Address",
+			"sourceColumns": "[AddressID]\r\n      ,[AddressLine1]\r\n      ,[AddressLine2]\r\n      ,[City]\r\n      ,[StateProvince]\r\n      ,[CountryRegion]\r\n      ,[PostalCode]\r\n      ,[rowguid]\r\n      ,[ModifiedDate]",
+			"destinationContainer": "raw",
+			"destinationFolder": "address",
+			"destinationFile": "address.csv"
+		},
+		{
+			"sourceId": 2,
+			"sourceSchema": "SalesLT",
+			"sourceTable": "Customer",
+			"sourceColumns": "[CustomerID]\r\n      ,[NameStyle]\r\n      ,[Title]\r\n      ,[FirstName]\r\n      ,[MiddleName]\r\n      ,[LastName]\r\n      ,[Suffix]\r\n      ,[CompanyName]\r\n      ,[SalesPerson]\r\n      ,[EmailAddress]\r\n      ,[Phone]\r\n      ,[PasswordHash]\r\n      ,[PasswordSalt]\r\n      ,[rowguid]\r\n      ,[ModifiedDate]",
+			"destinationContainer": "raw",
+			"destinationFolder": "Customer",
+			"destinationFile": "Customer.csv"
+		},
+		{
+			"sourceId": 3,
+			"sourceSchema": "dbo",
+			"sourceTable": "BuildVersion",
+			"sourceColumns": "[SystemInformationID]\r\n      ,[Database Version]\r\n      ,[ModifiedDate] as DateModified",
+			"destinationContainer": "raw",
+			"destinationFolder": "BuildVersion",
+			"destinationFile": "BuildVersiondata.csv"
+		}
+	],
+	"effectiveIntegrationRuntime": "AutoResolveIntegrationRuntime (East US)",
+	"billingReference": {
+		"activityType": "PipelineActivity",
+		"billableDuration": [
+			{
+				"meterType": "AzureIR",
+				"duration": 0.016666666666666666,
+				"unit": "DIUHours"
+			}
+		]
+	},
+	"durationInQueue": {
+		"integrationRuntimeQueue": 0
+	}
+}

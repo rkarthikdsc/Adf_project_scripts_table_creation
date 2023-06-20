@@ -1,0 +1,63 @@
+PtableName
+dbo.EmployeeDetails , Updated
+----------------
+
+
+LookupNewWaterMark
+
+select MAX(@{pipeline().parameters.pColumnName}) as NewWaterMark
+from
+@{pipeline().parameters.PtableName}
+
+--------------
+
+LookupExistingWaterMark
+Select * from config.tbl_watermark
+where 
+SourceTable =  '@{pipeline().parameters.PtableName}'
+
+-----------------
+Copy Incremental Data
+Source:
+
+select * from
+@{activity('LookupExistingWaterMark').output.firstRow.SourceTable}
+where 
+@{activity('LookupExistingWaterMark').output.firstRow.WatermarkColumn}  > '@{activity('LookupExistingWaterMark').output.firstRow.LastUpdated}' 
+and 
+@{activity('LookupExistingWaterMark').output.firstRow.WatermarkColumn}  <='@{activity('LookupNewWaterMark').output.firstRow.NewWaterMark}'
+
+Sink:
+
+Container Name: raw
+
+
+Folder Name:
+
+@concat(
+pipeline().parameters.PtableName,
+'/',
+utcnow('yyyy'),
+'/',
+utcnow('MM'),
+'/',
+utcnow('dd')
+)
+
+
+File Name:
+
+@concat(
+activity('LookupExistingWaterMark').output.firstRow.SourceTable,
+'_',
+utcNow(),
+'.csv')
+
+
+
+Stored Procedure Update Water Mark
+
+@pipeline().parameters.PtableName
+@activity('LookupNewWaterMark').output.firstRow.NewWaterMark
+
+

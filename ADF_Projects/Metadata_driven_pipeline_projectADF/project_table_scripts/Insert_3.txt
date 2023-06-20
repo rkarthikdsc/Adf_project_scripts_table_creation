@@ -1,0 +1,20 @@
+INSERT INTO [config].[tbl_data_source]
+           ([sourceSchema]
+           ,[sourceTable]
+           ,[sourceColumns]
+           ,[destinationContainer]
+           ,[destinationFolder]
+           ,[destinationFile])
+     VALUES
+           ('dbo'
+           ,'BuildVersion'
+           ,
+			'[SystemInformationID]
+			,[Database Version]      
+			,[ModifiedDate] as dateModified'
+           ,'raw'
+           ,'BuildVersion'
+           ,'BuildVersiondata.csv')
+GO
+
+

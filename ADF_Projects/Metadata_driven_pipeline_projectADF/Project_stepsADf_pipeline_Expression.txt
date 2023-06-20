@@ -1,0 +1,258 @@
+Steps followed to execute the Metadeta Driven file copying.
+
+1. Create/Determine the source and Destination
+
+2. In our case, source is Azure Sql database (so created a sqldatabase)
+
+3. Sink is Azure Gen2 container(Raw/address)
+
+4. while creating a database in azure we choose sample data and used the adventureworks tables.
+
+5. Creating a Source :
+
+-- a. First create a new schema
+
+CREATE SCHEMA config;
+GO
+
+---b.create a new metadata table
+
+CREATE TABLE config.tbl_data_source
+	(
+	sourceId int identity(1,1), 
+	sourceSchema varchar(150),
+	sourceTable varchar(150),
+	sourceColumns varchar(550),
+	destinationContainer varchar(150),
+	destinationFolder varchar(150),
+	destinationFile varchar(150),
+	);
+
+
+6. After the config.tbl_data_source table is created right click and 
+	i.	select 'script table as'
+	ii.	Insert to
+	iii. 	New query editor window
+
+It will open like 
+
+USE [adventureworksdb]
+GO
+
+INSERT INTO [config].[tbl_data_source]
+           ([sourceSchema]
+           ,[sourceTable]
+           ,[sourceColumns]
+           ,[destinationContainer]
+           ,[destinationFolder]
+           ,[destinationFile])
+     VALUES
+           (<sourceSchema, varchar(150),>
+           ,<sourceTable, varchar(150),>
+           ,<sourceColumns, varchar(550),>
+           ,<destinationContainer, varchar(150),>
+           ,<destinationFolder, varchar(150),>
+           ,<destinationFile, varchar(150),>)
+GO
+----------------------------------------------------------
+
+
+Now, change the values with our source table and sink container details as below,
+
+USE [adventureworksdb]
+GO
+
+INSERT INTO [config].[tbl_data_source]
+           ([sourceSchema]
+           ,[sourceTable]
+           ,[sourceColumns]
+           ,[destinationContainer]
+           ,[destinationFolder]
+           ,[destinationFile])
+     VALUES
+           ('SalesLT'
+           ,'Address'
+           ,'[AddressID]
+      ,[AddressLine1]
+      ,[AddressLine2]
+      ,[City]
+      ,[StateProvince]
+      ,[CountryRegion]
+      ,[PostalCode]
+      ,[rowguid]
+      ,[ModifiedDate]'
+           ,'raw'
+           ,'address'
+           ,'address.csv')
+GO
+
+-----------------------------------------------------------------------------------
+
+7 . Now come to the Azure data factory and create Linked services and the datasets for (source/sink).
+
+8.  create a pipeline 
+
+	i.	Lookup activity ( settings >>> use query >>> query
+
+SELECT  [sourceId]
+      ,[sourceSchema]
+      ,[sourceTable]
+      ,[sourceColumns]
+      ,[destinationContainer]
+      ,[destinationFolder]
+      ,[destinationFile]
+  FROM [config].[tbl_data_source]
+
+	ii.	ForEach Activity (Settings >>> items : @activity('Lookup_metadata').output.value
+
+	iii.  	Inside ForEachActivity >>>> create copyActivity
+
+Inside the copyActivity give the below expression and the values respectively.
+
+
+Source_Dataset Expression:
+
+select @{item().sourceColumns} from @{item().SourceSchema}.@{item().sourceTable}
+
+
+Sink_Dataset Expression:
+
+In sink create 3 parameters (PFileName,PContainerName,PFolderaName)
+
+AFter that use those parameters inside the dataset.
+
+PContainername :  @item().destinationContainer
+
+PFolderaName	: @item().destinationFolder
+
+PFileName	: @item().destinationFile
+
+--------------------------------------------------------------------------------------
+
+9. In Sink now if we need to save a data into a specific container based on the year,month and date wise then use the below expression.
+
+
+Replace the PFolderaName	: @item().destinationFolder >>>>> value with below expression.
+
+
+@concat(item().destinationFolder,'/',utcnow('yyyy'),'/',utcnow('MM'),'/',utcnow('dd'))
+
+
+Realtime (In case, if we execute yesterdays file today and needs to store on the relevant yesterday date use below expression.)
+
+
+@concat(item().destinationFolder,'/',utcnow('yyyy'),'/',utcnow('MM'),'/',utcnow(),1,'dd'))
+
+
+
+--------------------------------------------------------------------------------------
+
+Transformation logics are done and developed. Now, we need have audit log database.
+
+10. Now create a log audit table to add each execution to the table.
+
+
+CREATE TABLE config.tbl_log_details
+	(
+	logId int identity(1,1),
+	dataFactory varchar(150),
+	pipelineName varchar(150),
+	pipelineRunId varchar(150),
+	sourceTable varchar(150),	
+	destinationFolder varchar(150),
+	destinationFile varchar(150),
+	triggerTime date,
+	triggerName varchar(150),
+	triggerType varchar(50),
+	rowsRead int,
+	rowsCopied int,
+	throughPut decimal (15,1),
+	errors  varchar(Max),
+	execution_Details_source_type  varchar(150),
+	execution_Details_sink_type  varchar(150),
+	execution_Details_status  varchar(100),
+	effective_Integration_Runtime  varchar(150),
+	used_Data_Integration_Units  int,
+	billing_Reference_activity_Type  varchar(150)
+	)
+
+go
+
+---------------------------------------------
+
+11.  Now We need to create a Stored procedure to insert the execution records to the table.
+
+
+create procedure usp_insertlogdetails
+@dataFactory varchar(150)null
+           ,@pipelineName varchar(150)null
+           ,@pipelineRunId varchar(150)null
+           ,@sourceTable varchar(150)null
+           ,@destinationFolder varchar(150)null
+           ,@destinationFile varchar(150)null
+           ,@triggerTime date null
+           ,@triggerName varchar(150)null
+           ,@triggerType varchar(50)null
+           ,@rowsRead int null
+           ,@rowsCopied int null
+           ,@throughPut decimal(15,1)null
+           ,@errors varchar(max)null
+           ,@execution_Details_source_type varchar(150)null
+           ,@execution_Details_sink_type varchar(150)null
+           ,@execution_Details_status varchar(100)null
+           ,@effective_Integration_Runtime varchar(150)null
+           ,@used_Data_Integration_Units int null
+           ,@billing_Reference_activity_Type varchar(150)null
+
+		   AS
+		   Begin
+
+INSERT INTO [config].[tbl_log_details]
+           ([dataFactory]
+           ,[pipelineName]
+           ,[pipelineRunId]
+           ,[sourceTable]
+           ,[destinationFolder]
+           ,[destinationFile]
+           ,[triggerTime]
+           ,[triggerName]
+           ,[triggerType]
+           ,[rowsRead]
+           ,[rowsCopied]
+           ,[throughPut]
+           ,[errors]
+           ,[execution_Details_source_type]
+           ,[execution_Details_sink_type]
+           ,[execution_Details_status]
+           ,[effective_Integration_Runtime]
+           ,[used_Data_Integration_Units]
+           ,[billing_Reference_activity_Type])
+     VALUES
+           (
+		   @dataFactory
+           ,@pipelineName
+           ,@pipelineRunId
+           ,@sourceTable
+           ,@destinationFolder
+           ,@destinationFile
+           ,@triggerTime
+           ,@triggerName
+           ,@triggerType
+           ,@rowsRead
+           ,@rowsCopied
+           ,@throughPut
+           ,@errors
+           ,@execution_Details_source_type
+           ,@execution_Details_sink_type
+           ,@execution_Details_status
+           ,@effective_Integration_Runtime
+           ,@used_Data_Integration_Units
+           ,@billing_Reference_activity_Type
+		   )
+		   end
+GO
+
+
+
+
+

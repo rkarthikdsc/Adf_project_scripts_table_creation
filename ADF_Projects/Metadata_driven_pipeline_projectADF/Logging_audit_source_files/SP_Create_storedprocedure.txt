@@ -1,0 +1,69 @@
+create procedure usp_insertlogdetails
+@dataFactory  varchar(150) null
+,@pipelineName  varchar(150) null
+,@pipelineRunId  varchar(150) null
+,@sourceTable  varchar(150) null
+,@destinationFolder  varchar(150) null
+,@destinationFile  varchar(150) null
+,@triggerTime  date null
+,@triggerName  varchar(150) null
+,@triggerType  varchar(50) null
+,@rowsRead  int null
+,@rowsCopied  int null
+,@throughPut  decimal(15,1) null
+,@errors  varchar(max) null
+,@execution_Details_source_type  varchar(150) null
+,@execution_Details_sink_type  varchar(150) null
+,@execution_Details_status  varchar(100) null
+,@effective_Integration_Runtime  varchar(150) null
+,@used_Data_Integration_Units  int null
+,@billing_Reference_activity_Type  varchar(150) null
+
+as
+begin
+INSERT INTO [config].[tbl_log_details]
+           ([dataFactory]
+           ,[pipelineName]
+           ,[pipelineRunId]
+           ,[sourceTable]
+           ,[destinationFolder]
+           ,[destinationFile]
+           ,[triggerTime]
+           ,[triggerName]
+           ,[triggerType]
+           ,[rowsRead]
+           ,[rowsCopied]
+           ,[throughPut]
+           ,[errors]
+           ,[execution_Details_source_type]
+           ,[execution_Details_sink_type]
+           ,[execution_Details_status]
+           ,[effective_Integration_Runtime]
+           ,[used_Data_Integration_Units]
+           ,[billing_Reference_activity_Type])
+     VALUES
+           (
+				 @dataFactory 
+				,@pipelineName  
+				,@pipelineRunId  
+				,@sourceTable  
+				,@destinationFolder 
+				,@destinationFile 
+				,@triggerTime 
+				,@triggerName 
+				,@triggerType 
+				,@rowsRead 
+				,@rowsCopied  
+				,@throughPut 
+				,@errors 
+				,@execution_Details_source_type 
+				,@execution_Details_sink_type  
+				,@execution_Details_status  
+				,@effective_Integration_Runtime  
+				,@used_Data_Integration_Units 
+				,@billing_Reference_activity_Type  
+ )
+		   end
+GO
+
+

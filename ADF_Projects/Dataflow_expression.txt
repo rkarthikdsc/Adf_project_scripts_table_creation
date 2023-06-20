@@ -1,0 +1,58 @@
+Derived columns :(Creating new hashcolumns)
+
+Column			Expression
+ID_Hash			md5(byName($parameter_ID))    # (parameter name :  parameter_ID  , value  'ID')
+SCD_Hash		md5(byNames(split($parameter_SCD,','))) # (parameter name :  parameter_SCD , value : 'Club,Wage,Position')
+
+# we use this expression when we give select multiple columns for SCD (in this parament SCD we choose columns like Club,Wage,Position)
+
+
+
+
+Addsurrogatekey
+
+
+Aggregate: (using this activity we are finding the maximum value of Surrogatekey in an exsisting table.)
+
+
+Column		Expression
+MaxSkey		max(toInteger(byName('SKey')))
+
+
+After getting the max surrogate key value we add the aggregate max value with +1 to the surrogatekey. (for ex: if maxSKEY is 10, then next step will start from number 11)
+so, Join max surrogate key with add surrogate key. 
+
+now implementing addition of surrogatekey(SKey) to maxSKEY using derived columns
+
+Column		Expression
+SKey		SKey+ iifNull(MaxSkey,0)  (iifNull is used incase if there is no value(null) in MaxKey and if we add MaxSKey with Skey that will bring Skey value also Null. so in order to prevent such scenario we enforce zero if the value is NULL.)
+
+Active		1
+
+ActiveStartTime	currentUTC()
+
+ActiveEndTime	toTimestamp(toString(null()))
+
+
+
+next step:
+
+SELECT ACTIVITY: To select the relevant columns.
+
+Delete all the column names list in the cells and select the rule based selection
+
+expression builder :
+
+
+caluculateExtracolumns's column					Name as
+name!='ID_Hash'&& name!='SCD_Hash' && name!='MaxSkey'		$$
+
+
+
+
+
+
+
+
+
+

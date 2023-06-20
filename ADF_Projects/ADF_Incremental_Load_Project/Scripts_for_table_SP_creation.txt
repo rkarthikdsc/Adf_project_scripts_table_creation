@@ -1,0 +1,205 @@
+drop table config.tbl_watermark;
+
+create table config.tbl_watermark
+(
+SourceTable varchar(150) not null,
+WatermarkColumn varchar(150) not null,
+LastUpdated datetime not null);
+
+---truncate table config.tbl_watermark;
+
+
+insert into config.tbl_watermark
+(
+	SourceTable,
+	WatermarkColumn,
+	LastUpdated 
+)
+values
+(
+	'SalesLT.ProductDetails',
+	'LastUpdated',
+	'1/1/2023 12:00:00 AM'
+);
+
+
+insert into config.tbl_watermark
+(
+	SourceTable,
+	WatermarkColumn,
+	LastUpdated 
+)
+values
+(
+	'dbo.EmployeeDetails',
+	'[Updated]',
+	'1/1/2023 12:00:00 AM'
+);
+
+Select * from config.tbl_watermark;
+
+
+USE [adventureworksdb]
+GO
+
+
+create table dbo.EmployeeDetails
+(
+	id int identity(1,1),
+	FirstName nvarchar(255) not null,
+	LastName nvarchar(255) not null,
+	Age int,
+	PhoneNumber nvarchar(20) not null,
+	Updated datetime not null
+)
+
+go
+
+INSERT INTO [dbo].[EmployeeDetails]
+           ([FirstName]
+           ,[LastName]
+           ,[Age]
+           ,[PhoneNumber]
+           ,[Updated])
+     VALUES
+           ('Sarafudheen'
+           ,'PM'
+           ,35
+           ,''
+           ,GETDATE())
+GO
+
+
+
+INSERT INTO [dbo].[EmployeeDetails]
+           ([FirstName]
+           ,[LastName]
+           ,[Age]
+           ,[PhoneNumber]
+           ,[Updated])
+     VALUES
+           ('Raju'
+           ,'J'
+           ,35
+           ,''
+           ,GETDATE())
+
+
+
+
+INSERT INTO [dbo].[EmployeeDetails]
+           ([FirstName]
+           ,[LastName]
+           ,[Age]
+           ,[PhoneNumber]
+           ,[Updated])
+     VALUES
+           ('Clara'
+           ,'Galle'
+           ,20
+           ,''
+           ,GETDATE())
+
+
+select * from [dbo].[EmployeeDetails];
+
+
+INSERT INTO [dbo].[EmployeeDetails]
+           ([FirstName]
+           ,[LastName]
+           ,[Age]
+           ,[PhoneNumber]
+           ,[Updated])
+     VALUES
+           ('David'
+           ,'Warner'
+           ,36
+           ,''
+           ,GETDATE())
+
+
+USE [adventureworksdb]
+GO
+drop table SalesLT.ProductDetails;
+
+go
+create table SalesLT.ProductDetails
+(
+	id int identity(1,1),
+	ProductName nvarchar(255) not null,
+	ProductType nvarchar(255) not null,
+	LastUpdated datetime not null
+)
+
+go
+
+INSERT INTO [SalesLT].[ProductDetails]
+           ([ProductName]
+           ,[ProductType]
+           ,[LastUpdated])
+     VALUES
+           ('Samsung 80 cm (32 Inches) Wondertainment Series HD Ready LED Smart TV'
+           ,'Smart TV'
+           ,GETDATE())
+GO
+
+
+INSERT INTO [SalesLT].[ProductDetails]
+           ([ProductName]
+           ,[ProductType]
+           ,[LastUpdated])
+     VALUES
+           ('Samsung 32 inch (81.3 cm) Smart Monitor'
+           ,'Smart Monitor'
+           ,GETDATE())
+GO
+
+
+
+INSERT INTO [SalesLT].[ProductDetails]
+           ([ProductName]
+           ,[ProductType]
+           ,[LastUpdated])
+     VALUES
+           ('Samsung Galaxy Watch5 Bluetooth'
+           ,'Watch 5'
+           ,GETDATE())
+GO
+
+select * from [SalesLT].[ProductDetails];
+
+go
+
+INSERT INTO [SalesLT].[ProductDetails]
+           ([ProductName]
+           ,[ProductType]
+           ,[LastUpdated])
+     VALUES
+           ('Samsung 6.5 Kg 5 Star Inverter Fully-Automatic Top Loading Washing Machine'
+           ,'Top Loading Washing Machine'
+           ,GETDATE());
+GO
+
+
+
+INSERT INTO [SalesLT].[ProductDetails]
+           ([ProductName]
+           ,[ProductType]
+           ,[LastUpdated])
+     VALUES
+           ('Samsung 253 L 3 Star with Inverter Double Door Refrigerator'
+           ,'Double Door Refrigerator'
+           ,GETDATE());
+
+
+
+create  procedure usp_update_watermarks
+	@TableName varchar(150)  null,
+	@Updated datetime  null
+AS
+begin
+	UPDATE [config].[tbl_watermark]
+	   SET 
+		   [LastUpdated] = @Updated
+	 WHERE [SourceTable] = @TableName;
+ end

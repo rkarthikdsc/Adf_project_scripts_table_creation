@@ -1,0 +1,16 @@
+--create new schema
+
+--CREATE SCHEMA config;
+--GO
+
+--create new metadata table for
+CREATE TABLE config.tbl_data_source
+	(
+	sourceId int identity(1,1), 
+	sourceSchema varchar(150),
+	sourceTable varchar(150),
+	sourceColumns varchar(550),
+	destinationContainer varchar(150),
+	destinationFolder varchar(150),
+	destinationFile varchar(150),
+	);

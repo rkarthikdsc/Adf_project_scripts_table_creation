@@ -1,0 +1,29 @@
+USE [adventureworksdb]
+GO
+
+INSERT INTO [config].[tbl_data_source]
+           ([sourceSchema]
+           ,[sourceTable]
+           ,[sourceColumns]
+           ,[destinationContainer]
+           ,[destinationFolder]
+           ,[destinationFile])
+     VALUES
+           ('SalesLT'
+           ,'Address'
+           ,
+			'[AddressID]
+			,[AddressLine1]
+			,[AddressLine2]
+			,[City]
+			,[StateProvince]
+			,[CountryRegion]
+			,[PostalCode]
+			,[rowguid]
+			,[ModifiedDate]'
+           ,'raw'
+           ,'address'
+           ,'address.csv')
+GO
+
+

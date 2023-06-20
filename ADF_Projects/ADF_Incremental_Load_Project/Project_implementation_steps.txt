@@ -1,0 +1,173 @@
+Steps
+
+1. Create WaterMark table,EmployeeDetail,Sales.Product tables and the store procedure to update the watermark table.
+
+ADF pipeline implementation
+
+2. Lookup Activity: (Make sure you clicked the FirstRow only option for Incremental in watermark table as we iterate one after the other table.)
+
+
+Inside the lookup activity create one paramater for tablename as 'PtableName'.
+
+Query :  
+
+Select * from config.tbl_watermark 
+Where sourceTable = '@{pipeline().parameters.PTableName}'
+
+3. Configure a Lookup activity to get the newwatermark value
+
+To get the updated watertable value use 
+
+select 
+
+
+Implementing Incremental load:
+
+Inside 'EmployeeDetails' table we have a audit column name 'updated'
+Inside 'productsDetails' table we have a audit column name 'Lastupdated'
+
+Then in the Watermark' table we have linked/referenced each table audit column values under Watermarkcolumn.
+To reference the source tables in 'WaterMark' Table we have SourceTable field.
+Also, we have a LastUpdated field for each sourceTAbles.
+
+In ADF:
+
+We create two parameters for tablename and the columnname
+
+WE have two lookups
+
+1. Exsisting Watermark valuelookup
+
+2. New watermark valuelookup
+
+
+
+1. Exsisting Watermark valuelookup 
+
+
+Select * from config.tbl_watermark 
+Where sourceTable = '@{pipeline().parameters.PTableName}'
+
+2. New watermark valuelookup (This takes the maximum value from the watermarkcolumn
+
+select 
+max(@{pipeline().parameters.PColumnName}) as NewWaterMark 
+from 
+@{pipeline().parameters.PTableName}
+
+-------------------------------------------------------
+
+Now executing the copy activity
+
+
+Base query to remember before  building expersion for incremental
+=========================================================================
+
+Below Query just for understanding ;
+select * from dbo.EmployeeDetails
+where updated > 'Existingwatermark and updated <= 'NewWatermark'
+
+=========================================================================
+
+original Incremental load query inside the copy activity :
+
+select * from @{pipeline().parameters.P_TableName}
+where 
+@{activity('Lookup Existing watermark').output.firstRow.WatermarkColumn} > '@{activity('Lookup Existing watermark').output.firstRow.LastUpdated}' 
+and 
+@{activity('Lookup Existing watermark').output.firstRow.WatermarkColumn} <= '@{activity('Lookup New watermark').output.firstRow.NewWaterMark}'
+
+
+============================================================================
+
+To update the last updated date for the incremental load, we need to create a store procedure
+
+Inside the store procedure,select the relevant linked services and the created stored procedure name.
+
+Then, Import the Parameters.
+
+In this store procedure we have two parameters and its value below;
+
+TableName   :    @pipeline().parameters.P_TableName
+Updated	    :    @activity('Lookup New watermark').output.firstRow.NewWaterMark
+
+Once, we update the stored procedures the LastUpdated column in the WaterMark table gets updated automatically.
+=====================================================================================
+
+Now Create a Master pipeline for the incremental load.
+
+1. Create a Lookup Activity 
+
+Name :  Lookup_Exisiting_WaterMark
+ 
+
+Query :
+
+Select * from config.tbl_watermark
+
+
+2. Create a ForEach activity
+
+
+Name : ForEach_IncrementalLoad_watermark
+
+Sequential ; Yes
+
+items : 
+
+@activity('Lookup_Exisiting_WaterMark').output.value
+
+
+Inside the Activities :
+
+Create Execute Pipelines  :  Execute_child_incrementalLoad_watermarkPL
+
+Invoke Pipeline :  PL_final-incrementalLoad (Childpipeline name)
+============================Successfully_Completed==================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+select * from @{pipeline().parameters.PTableName}
+Where
+@{activity('Exisisting_Lookup_sourcetbl').output.firstRow.WaterMarkColumn} >'@{activity('Exisisting_Lookup_sourcetbl').output.firstRow.LastUpdated}'
+and
+@{activity('Exisisting_Lookup_sourcetbl').output.firstRow.WaterMarkColumn} <= '@{activity('New_watermark_Lookup').output.firstRow.NewWaterMark}'
+
+
+1. Source :
+
+activity('Exisisting_Lookup_sourcetbl').output.firstRowselect * from
+@{activity('Exisisting_Lookup_sourcetbl').output.firstRow.SourceTable}
+Where
+@{activity('Exisisting_Lookup_sourcetbl').output.firstRow.WaterMarkColumn} >'@{activity('Exisisting_Lookup_sourcetbl').output.firstRow.LastUpdated}'
+and
+@{activity('Exisisting_Lookup_sourcetbl').output.firstRow.WaterMarkColumn} <= '@{activity('New_watermark_Lookup').output.firstRow.NewWaterMark}'
+
+
+
+
+
+
+
+
+
